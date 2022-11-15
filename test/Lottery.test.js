@@ -5,7 +5,7 @@ const web3 = new Web3(ganache.provider());
 const { abi, evm } = require('../compile');
 
 let accounts;
-let inbox;
+let lottery;
 
 
 beforeEach(async () => { //azioni preliminari per ogni it (test)
@@ -13,7 +13,7 @@ beforeEach(async () => { //azioni preliminari per ogni it (test)
     accounts = await web3.eth.getAccounts();
 
     //Use one of this account to Deploy the contract
-    inbox = await new web3.eth.Contract(abi)
+    lottery = await new web3.eth.Contract(abi)
     .deploy({ 
         data: evm.bytecode.object
     })
@@ -23,7 +23,7 @@ beforeEach(async () => { //azioni preliminari per ogni it (test)
     });
 });
 
-describe('Inbox', () => {
+/* describe('Inbox', () => {
     it('deploy a contract', () => {
         // console.log(inbox);
         assert.ok(inbox.options.address); //verifico se esiste il valore per il campo address (deply contratto eseguito correttamente)
@@ -42,4 +42,4 @@ describe('Inbox', () => {
         console.log(message);
         assert.notEqual(message, INITIAL_STRING);
     });
-})
+}) */
