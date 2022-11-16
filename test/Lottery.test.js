@@ -23,23 +23,72 @@ beforeEach(async () => { //azioni preliminari per ogni it (test)
     });
 });
 
-/* describe('Inbox', () => {
+describe('Lottery Contract', () => {
     it('deploy a contract', () => {
-        // console.log(inbox);
-        assert.ok(inbox.options.address); //verifico se esiste il valore per il campo address (deply contratto eseguito correttamente)
+        assert.ok(lottery.options.address);
     });
 
-    it('ok create init message', async () => {
-        const message = await inbox.methods.message().call(); //.call(), chiamo una funzione del contratto senza transazione e senza cambiare lo stato del contratto
-        console.log(message);
-        assert.equal(message, INITIAL_STRING);
+    it('allow one account to enter', async () => {
+        await lottery.methods.enter().send({ //.send() perchè è una transazione, eseguo una modifica e manda una transazione che ha un gasPrice.
+            from: accounts[0],
+            value: web3.utils.toWei('0.02', 'ether'),
+        });
+
+        const players = await lottery.methods.getPlayers().call({ //.call(), chiamo una funzione del contratto senza transazione e senza cambiare lo stato del contratto
+            from: accounts[0],
+        })
+
+        assert.equal(accounts[0], players[0]);
+        assert.equal(1, players.length)
     });
 
-    it('ok setMessage', async () => {
-        await inbox.methods.setMessage('Messaggio modificato').send({ from: accounts[0] }); //.send() perchè è una transazione, eseguo una modifica e manda una transazione che ha un gasPrice.
+    it('allow multiple accounts to enter', async () => {
+        await lottery.methods.enter().send({ //.send() perchè è una transazione, eseguo una modifica e manda una transazione che ha un gasPrice.
+            from: accounts[0],
+            value: web3.utils.toWei('0.02', 'ether'),
+        });
 
-        const message = await inbox.methods.message().call();
-        console.log(message);
-        assert.notEqual(message, INITIAL_STRING);
+        await lottery.methods.enter().send({ //.send() perchè è una transazione, eseguo una modifica e manda una transazione che ha un gasPrice.
+            from: accounts[1],
+            value: web3.utils.toWei('0.03', 'ether'),
+        });
+
+        await lottery.methods.enter().send({ //.send() perchè è una transazione, eseguo una modifica e manda una transazione che ha un gasPrice.
+            from: accounts[2],
+            value: web3.utils.toWei('0.02', 'ether'),
+        });
+
+        const players = await lottery.methods.getPlayers().call({ //.call(), chiamo una funzione del contratto senza transazione e senza cambiare lo stato del contratto
+            from: accounts[0],
+        })
+
+        assert.equal(accounts[0], players[0]);
+        assert.equal(accounts[1], players[1]);
+        assert.equal(accounts[2], players[2]);
+        assert.equal(3, players.length)
     });
-}) */
+
+    it('require a minimum amount of ether', async () => {
+        try {
+            await lottery.methods.enter().send({
+                from: accounts[0],
+                value: 0
+            });
+
+            assert(false);
+        } catch(e) {
+            assert(e);
+        }
+    });
+
+    it('only manager can call pickWinner', async () => {
+        try {
+            await lottery.methods.pickWinner.send({
+                from: accounts[1],
+            });
+            assert(false); // se arrivo a questa linea di codice il test non è valido, dato che solo accounts[0] può chiamare pickWinner (manager)
+        } catch(e) {
+            assert(e);
+        }
+    });
+});
